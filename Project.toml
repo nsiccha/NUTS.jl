@@ -1,0 +1,4 @@
+name = "NUTS"
+uuid = "315f5978-0946-4a2e-a587-8b3b49091a4d"
+authors = ["Nikolas Siccha <nikolassiccha@gmail.com>"]
+version = "0.1.0"

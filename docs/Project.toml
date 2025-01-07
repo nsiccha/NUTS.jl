@@ -1,0 +1,12 @@
+[deps]
+BangBang = "198e06fe-97b7-11e9-32a5-e1d131e6ad66"
+Chairmarks = "0ca39b1e-fe0b-4e98-acfc-b1656634c4de"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+DynamicHMC = "bbc10e6e-7c05-544b-b16e-64fede858acb"
+DynamicObjects = "23d02862-63fe-4c6e-8fdb-1d52cbbd39d5"
+IJulia = "7073ff75-c697-5162-941a-fcdaad2a7d2a"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+LogDensityProblems = "6fdf6af0-433a-55f7-b3ed-c6c6e0b8df7c"
+LogExpFunctions = "2ab3a3ac-af41-5b50-aa03-7779005ae688"
+NUTS = "315f5978-0946-4a2e-a587-8b3b49091a4d"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
