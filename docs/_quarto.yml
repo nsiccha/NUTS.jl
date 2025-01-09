@@ -6,8 +6,6 @@ website:
   navbar:
     search: true
     left:
-      - text: "Overview"
-        href: index.qmd
       - icon: github
         href:  https://github.com/nsiccha/NUTS.jl
 format: 
@@ -15,19 +13,9 @@ format:
         page-layout: full
         toc: true
         code-line-numbers: true
-        include-in-header:
-            text: |
-                <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.css" />
-                <script src="datatables.min.js"></script>
-                <script>
-                  $(document).ready( function () {
-                      $('table.interactive').DataTable({paging: false, order=[]});
-                  } );
-                </script
+        code-tools: true
 jupyter: julia-1.10
 execute:
   echo: false
   cache: true
   daemon: 60000
-# filters:
-  #  - include-code-files

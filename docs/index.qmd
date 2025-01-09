@@ -1,3 +1,102 @@
-```{julia}
+{{< include ../README.md >}}
 
+## Benchmark
+  
+Benchmarking and validating implementation using 100 chains sampling from a 100-dimensional standard normal distribution with unit stepsize. See code for benchmark details, either at [https://github.com/nsiccha/NUTS.jl/blob/main/docs/index.qmd](https://github.com/nsiccha/NUTS.jl/blob/main/docs/index.qmd) or on this page vie the menu in the top right corner of the text body.
+
+```{julia}
+using DynamicHMC, NUTS, Random, Distributions, LinearAlgebra, LogExpFunctions, Chairmarks, LogDensityProblems, AdvancedHMC, Plots, DataFrames
+ENV["CMDSTAN"] = "/home/niko/.cmdstan/cmdstan-2.34.0"
+using Stan
+    
+sm = (@isdefined sm) ? sm : Stan.SampleModel("Normal", """
+data{int n;}
+parameters{vector[n] x;}
+model{x ~ std_normal();}
+""")
+NUTS.log_density_gradient!(::IsoNormal, x::AbstractVector, g::AbstractVector) = begin
+    @. g = -x
+    -.5 * dot(x,x)
+end
+LogDensityProblems.capabilities(::IsoNormal) = LogDensityProblems.LogDensityOrder{1}()
+LogDensityProblems.dimension(d::IsoNormal) = length(mean(d))
+LogDensityProblems.logdensity_and_gradient(d::IsoNormal, x::AbstractVector) = -.5 * dot(x,x), -x
+q_err(x::AbstractVector) = mean((sort(x) .- quantile.(Normal(), range(0, 1, length(x)+2)[2:end-1])).^2)
+q_err(x::AbstractMatrix) = mean(q_err, eachrow(x))
+errs(x::AbstractMatrix) = (;mean_err=norm(mean(x; dims=2)), var_err=norm(1 .- var(x; dims=2)), q_err=q_err(x))
+iid_sample!(samples, rng, posterior; kwargs...) = begin 
+    time = @elapsed randn!(rng, samples)
+    (;time, n_leapfrog=NaN, errs(samples)...)
+end
+nuts_sample!(samples, rng, posterior; stepsize, position=randn(rng, size(samples, 1)), n_samples=size(samples, 2)) = begin
+    state = (;rng, posterior, stepsize, position)
+    n_leapfrog = 0
+    time = @elapsed for i in 1:n_samples
+        state = nuts!!(state)
+        samples[:, i] .= state.position
+        n_leapfrog += state.n_leapfrog
+    end
+    (;time, n_leapfrog=n_leapfrog / n_samples, errs(samples)...)
+end
+dynamichmc_sample!(samples, rng, posterior; stepsize, position=randn(rng, size(samples, 1)), n_samples=size(samples, 2)) = begin
+    algorithm = DynamicHMC.NUTS()
+    H = DynamicHMC.Hamiltonian(DynamicHMC.GaussianKineticEnergy(Diagonal(ones(d))), posterior)
+    Q = DynamicHMC.evaluate_ℓ(posterior, position; strict=true)
+    n_leapfrog = 0
+    time = @elapsed for i in 1:n_samples
+        Q, stats = DynamicHMC.sample_tree(rng, algorithm, H, Q, stepsize)
+        samples[:, i] .= Q.q
+        n_leapfrog += stats.steps
+    end
+    (;time, n_leapfrog=n_leapfrog / n_samples, errs(samples)...)
+end
+advancedhmc_sample!(samples, rng, posterior; stepsize, position=randn(rng, size(samples, 1)), n_samples=size(samples, 2)) = begin
+    h = AdvancedHMC.Hamiltonian(UnitEuclideanMetric(d), posterior)
+    kernel = HMCKernel(Trajectory{MultinomialTS}(Leapfrog(stepsize), StrictGeneralisedNoUTurn()))
+    z = AdvancedHMC.phasepoint(rng, position, h) 
+    n_leapfrog = 0
+    time = @elapsed for i in 1:n_samples
+        (;stat, z) = AdvancedHMC.transition(rng, h, kernel, z)
+        samples[:, i] .= z.θ
+        n_leapfrog += stat.n_steps
+    end
+    (;time, n_leapfrog=n_leapfrog / n_samples, errs(samples)...)
+end
+stan_sample!(samples, rng, posterior; stepsize, position=randn(rng, size(samples, 1)), n_samples=size(samples, 2)) = begin 
+    data = Dict("n"=>length(position))
+    time = @elapsed Stan.stan_sample(sm; data, num_chains=1, num_samples=n_samples, num_warmups=0, engaged=false, stepsize, init=Dict("x"=>randn(d)));
+    df = Stan.read_samples(sm, :dataframe)
+    (;time, n_leapfrog=NaN, errs(Matrix(df)')...)
+end
+d = 100
+posterior = MultivariateNormal(zeros(d), I)
+stepsize = 1.
+n_samples = 1_000
+
+samples = zeros((d, n_samples))
+seeds = 1:100
+fs = (iid_sample!, nuts_sample!, dynamichmc_sample!, advancedhmc_sample!, stan_sample!)
+df = DataFrame([
+    merge((;f, seed), f(samples, Xoshiro(seed), posterior; stepsize))
+    for f in fs
+    for seed in seeds
+])
+combine(groupby(df, :f), :time=>mean, :n_leapfrog=>mean, :mean_err=>mean, :var_err=>mean, :q_err=>mean)
+```
+```{julia}
+plot(
+    plot(xscale=:log10, [
+        sort(df[df.f .== f, :time]) for f in fs
+    ], seeds, label=permutedims(collect(fs)), title="Runtime"), 
+    plot([
+        sort(df[df.f .== f, :mean_err]) for f in fs
+    ], seeds, label=permutedims(collect(fs)), title="Mean err"),
+    plot([
+        sort(df[df.f .== f, :var_err]) for f in fs
+    ], seeds, label=permutedims(collect(fs)), title="Var err"), 
+    plot([
+        sort(df[df.f .== f, :q_err]) for f in fs
+    ], seeds, label=permutedims(collect(fs)), title="Q err"),
+    layout=(:,1), size=(800, 1200)
+)
 ```
