@@ -1,0 +1,23 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "NUTS.jl",
+    "section": "",
+    "text": "A non-allocating NUTS implementation. Faster than and equivalent to Stan’s default implementation, DynamicHMC.jl’s implementation, and AdvancedHMC.jl’s HMCKernel(Trajectory{MultinomialTS}(Leapfrog(stepsize), StrictGeneralisedNoUTurn())).\nFor a 100 dimensional standard normal target with unit stepsize and 1k samples, I measure it to be ~5x slower than direct sampling (randn!(...)), ~6x faster than DynamicHMC, ~15x faster than AdvancedHMC and ~25x faster than Stan.jl. For most other posteriors the computation cost will be dominated by the cost of evaluating the log density gradient, so any real world speed-ups should be smaller."
+  },
+  {
+    "objectID": "index.html#usage",
+    "href": "index.html#usage",
+    "title": "NUTS.jl",
+    "section": "Usage",
+    "text": "Usage\nExports a single function, nuts!!(state). Use e.g. as\nnuts_sample!(samples, rng, posterior; stepsize, position=randn(rng, size(samples, 1)), n_samples=size(samples, 2)) = begin\n    state = (;rng, posterior, stepsize, position)\n    for i in 1:n_samples\n        state = nuts!!(state)\n        samples[:, i] .= state.position\n    end\n    state\nend\nwhere posterior has to implement log_density = NUTS.log_density_gradient!(posterior, position, log_density_gradient), i.e. it returns the log density and writes its gradient into log_density_gradient."
+  },
+  {
+    "objectID": "index.html#benchmark",
+    "href": "index.html#benchmark",
+    "title": "NUTS.jl",
+    "section": "Benchmark",
+    "text": "Benchmark\nBenchmarking and validating implementation using 100 chains sampling from a 100-dimensional standard normal distribution with unit stepsize. See code for benchmark details, either at https://github.com/nsiccha/NUTS.jl/blob/main/docs/index.qmd or on this page vie the menu in the top right corner of the text body.\n\n\n5×6 DataFrame\n\n\n\nRow\nf\ntime_mean\nn_leapfrog_mean\nmean_err_mean\nvar_err_mean\nq_err_mean\n\n\n\nFunction\nFloat64\nFloat64\nFloat64\nFloat64\nFloat64\n\n\n\n\n1\niid_sample!\n0.000490622\nNaN\n0.314764\n0.441364\n0.0032062\n\n\n2\nnuts_sample!\n0.00217772\n3.0\n0.297439\n1.39767\n0.0118994\n\n\n3\ndynamichmc_sample!\n0.0148681\n3.0\n0.297527\n1.41391\n0.0122698\n\n\n4\nadvancedhmc_sample!\n0.0355529\n3.0\n0.293058\n1.39392\n0.0119313\n\n\n5\nstan_sample!\n0.0558891\nNaN\n0.297224\n1.40276\n0.012117"
+  }
+]

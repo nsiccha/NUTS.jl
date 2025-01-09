@@ -1,9 +1,0 @@
-name = "NUTS"
-uuid = "315f5978-0946-4a2e-a587-8b3b49091a4d"
-authors = ["Nikolas Siccha <nikolassiccha@gmail.com>"]
-version = "0.1.0"
-
-[deps]
-LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-LogExpFunctions = "2ab3a3ac-af41-5b50-aa03-7779005ae688"
-Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
