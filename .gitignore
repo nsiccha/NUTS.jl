@@ -1,0 +1,7 @@
+.vscode
+.jupyter_cache
+_site
+getopt
+os
+sys
+sysconfig
