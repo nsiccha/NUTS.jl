@@ -3,7 +3,7 @@ module NUTS
 export nuts!!
 
 """
-Implements the No-U-Turn Sampler with multinomial sampling and the strict generalized no-u-turn critertion (CURRENTLY WITH IDENTITY METRIC).
+Implements the No-U-Turn Sampler with multinomial sampling and the strict generalized no-u-turn criterion.
 
 Takes a single `state` argument and returns `new_state`, which contains the new sample's position at `new_state.position` / `new_state.current.position` and the new sample's gradient at `new_state.current.gradient`.
 
@@ -19,18 +19,34 @@ and optional properties
     * max_depth = 10,
     * min_dhamiltonian = -1000. (divergence threshold),
     * current (current/initial phase point, i.e. the position, log_density, log_density_gradient, momentum, velocity, and hamiltonian),
-    * scale (TO BE IMPLEMENTED),
+    * scale (a linear transformation to facilitate sampling, e.g. the scale of the posterior; if not specified initialized as a) NUTS.msqrt(squared_scale) if squared_scale is specified or b) I if squared_scale is not specified),
+    * squared_scale (the square of scale, initialized as NUTS.square(scale) if not specified),
     * first (internal, leftmost phase point),
     * trees (internal, memory needed for recursion),
     * proposals (internal, memory needed for recursion).
 
-After first use, optional properties will be set in the returned `new_state` and reused in subsequent calls.
+After first use, optional properties will be set in the returned `new_state` and reused in subsequent calls. 
+
+The `scale` property has to implement `ldiv!(state.scale', state.current.momentum)`
+and should implement `NUTS.square(scale)` if the `squared_scale` property is not specified.
+
+The `squared_scale` property has to implement `mul!(state.current.velocity, state.squared_scale, state.current.momentum)`
+and should implement `NUTS.msqrt(squared_scale)` if the `scale` property is not specified.
 """
 function nuts!! end
 "Posteriors need to implement `log_density = NUTS.log_density_gradient!(posterior, position, log_density_gradient)`,
 i.e. return the log density and write its gradient into `log_density_gradient`"
 function log_density_gradient! end
-
+"A square root of x, e.g. `chol(x).L`."
+msqrt(x) = begin
+    @warn "You may want to implement NUTS.msqrt(::$(typeof(x)))"
+    chol(x).L
+end
+"The square of x, i.e. `x * x'`."
+square(x) = begin
+    @warn "You may want to implement NUTS.square(::$(typeof(x)))"
+    x * x'
+end
 using LinearAlgebra, Random, LogExpFunctions
 
 merge_expr(x) = x
@@ -73,10 +89,11 @@ end
 
 leapfrog!!(state, cfg) = @__!!__ begin 
     @. state.momentum += .5 * cfg.stepsize * state.log_density_gradient 
-    mul!(state.position, cfg.scale, state.momentum, cfg.stepsize, 1.)
+    state.position .+= cfg.stepsize .* mul!(state.velocity, cfg.squared_scale, state.momentum)
+    # mul!(state.position, cfg.squared_scale, state.momentum, cfg.stepsize, 1.)
     log_density_gradient!!(state, cfg.posterior)
     @. state.momentum += .5 * cfg.stepsize * state.log_density_gradient 
-    mul!(state.velocity, cfg.scale, state.momentum)
+    mul!(state.velocity, cfg.squared_scale, state.momentum)
     state
 end
 log_density_gradient!!(state, posterior) = @__!!__ begin 
@@ -126,10 +143,12 @@ nuts!!(state) = @__!!__ begin
         state.current = phase_point(state)
         state.trees = trees(dimension, state.max_depth)
         state.proposals = proposals(dimension, state.max_depth)
-        state.scale = I
+        state.scale = hasproperty(state, :squared_scale) ? msqrt(state.squared_scale) : I
+        state.squared_scale = square(state.scale) 
     end 
     randn!(state.rng, state.current.momentum)
-    mul!(state.current.velocity, state.scale, state.current.momentum)
+    ldiv!(state.scale', state.current.momentum)
+    mul!(state.current.velocity, state.squared_scale, state.current.momentum)
     hamiltonian!!(state.current)
     state.init_hamiltonian = state.current.hamiltonian
     copy!!(state.first, state.current)

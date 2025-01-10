@@ -2,7 +2,7 @@
 
 A non-allocating NUTS implementation. Faster than and equivalent to [Stan](https://mc-stan.org/)'s default implementation, [DynamicHMC.jl](https://github.com/tpapp/DynamicHMC.jl)'s implementation, and [AdvancedHMC.jl](https://github.com/TuringLang/AdvancedHMC.jl)'s `HMCKernel(Trajectory{MultinomialTS}(Leapfrog(stepsize), StrictGeneralisedNoUTurn()))`. 
 
-For a 100 dimensional standard normal target with unit stepsize and 1k samples, [I measure it](https://nsiccha.github.io/NUTS.jl/#benchmark) to be ~5x slower than direct sampling (`randn!(...)`), ~6x faster than DynamicHMC, ~15x faster than AdvancedHMC and ~25x faster than [Stan.jl](https://github.com/StanJulia/Stan.jl). **For most other posteriors the computation cost will be dominated by the cost of evaluating the log density gradient, so any real world speed-ups should be smaller.**
+For a 100 dimensional standard normal target with unit stepsize and 1k samples, [I measure it](https://nsiccha.github.io/NUTS.jl/#benchmark) to be ~5x slower than direct sampling (`randn!(...)`), ~6x faster than DynamicHMC, ~15x faster than AdvancedHMC and ~25x faster than [Stan.jl](https://github.com/StanJulia/Stan.jl). **For most other posteriors the computational cost will be dominated by the cost of evaluating the log density gradient, so any real world speed-ups should be smaller.**
 
 ## Usage
 
