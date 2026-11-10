@@ -1,0 +1,12 @@
+using AlgebraOfVega, Documenter
+import HTMXObjects
+
+function show_figure(spec, n_draws)
+    caption = "Quantiles from $n_draws retained draws per coordinate. Blue points " *
+              "compare sample and normal quantiles; the orange line marks equality. " *
+              "Both axes use units of the target standard deviation."
+    node = with_plot_caption(spec; plot_id="gaussian-quantiles",
+                             title="Gaussian quantiles", short=caption)
+    return Documenter.HTML(repr(MIME"text/html"(), vega_head(; source=:inline)) *
+                           repr(MIME"text/html"(), node))
+end

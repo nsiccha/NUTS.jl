@@ -1,0 +1,9 @@
+format:
+  html:
+    toc: true
+    code-line-numbers: true
+    code-tools: true
+jupyter: julia-1.10
+execute:
+  echo: false
+  cache: true
