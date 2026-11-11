@@ -53,7 +53,7 @@ initial = (rng=Xoshiro(seed), posterior=target,
            position=copy(target.center), stepsize=0.6,
            scale=Diagonal(target.scale),
            squared_scale=Diagonal(target.scale.^2))
-state = nuts!!(initial)
+state = initial
 (; initial_stepsize=state.stepsize,
    covariance=diag(state.squared_scale),
    position=copy(state.position))
