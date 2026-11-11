@@ -9,3 +9,5 @@ with an explicit step size and metric.
 
 The [documentation build](docs/README.md) executes the examples.
 The [historical timing experiment](bench/README.md) is maintained separately.
+
+NUTS.jl is released under the [MIT License](LICENSE).
