@@ -13,13 +13,15 @@ The page list is the reader's navigation, in this order:
 The old Quarto comparison lives in `../bench/`; it is not part of the site.
 The root README links to Start instead of maintaining another example.
 
-Build from the repository root:
+Build from the repository root with Julia 1.10.13, the version used by CI:
 
 ```sh
-julia --project=docs -e 'using Pkg; Pkg.develop(path=pwd()); Pkg.instantiate()'
+julia --project=docs -e 'using Pkg; Pkg.instantiate()'
 julia --project=docs docs/make.jl
 ```
 
+The committed manifest pins the documentation dependencies and already points
+NUTS at the repository root. Instantiate it without re-resolving those pins.
 The build executes the teaching examples and generates their figures under
 `docs/build/`. It runs no benchmark or fitted-data model. It checks runnable
 fences, prohibited prose, page lengths, example figures and the navigation

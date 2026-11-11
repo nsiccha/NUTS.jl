@@ -1,5 +1,16 @@
 using Documenter, DocumenterVitepress, NUTS
+using AlgebraOfVega
 include("vitepress_html.jl")
+
+# Copy generated assets before the renderer builds each VitePress version base.
+abstract type CopyVegaAssets <: Documenter.Builder.DocumentPipeline end
+Documenter.Selectors.order(::Type{CopyVegaAssets}) = 5.5
+function Documenter.Selectors.runner(::Type{CopyVegaAssets}, doc::Documenter.Document)
+    build = isabspath(doc.user.build) ? doc.user.build : joinpath(doc.user.root, doc.user.build)
+    destination = joinpath(build, "public", "assets", "vega")
+    mkpath(dirname(destination))
+    cp(vega_vendor_dir(), destination; force=true)
+end
 
 const DOCS_PAGES = [
     "Start" => ["NUTS.jl" => "index.md"],
@@ -17,20 +28,12 @@ makedocs(;
     format=DocumenterVitepress.MarkdownVitepress(
         repo="github.com/nsiccha/NUTS.jl",
         devbranch="main", devurl="dev",
-        build_vitepress=false,
     ),
     pages=DOCS_PAGES,
     checkdocs=:exports,
     warnonly=false,
     doctest=true,
 )
-
-using AlgebraOfVega
-let destination = joinpath(@__DIR__, "build", ".documenter", "public", "assets", "vega")
-    mkpath(dirname(destination))
-    cp(vega_vendor_dir(), destination; force=true)
-end
-DocumenterVitepress.build_docs(joinpath(@__DIR__, "build"))
 
 DocumenterVitepress.deploydocs(;
     repo="github.com/nsiccha/NUTS.jl", devbranch="main", push_preview=true,
