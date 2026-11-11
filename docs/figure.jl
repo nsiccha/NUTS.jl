@@ -7,6 +7,7 @@ function show_figure(spec, n_draws)
               "Both axes use units of the target standard deviation."
     node = with_plot_caption(spec; plot_id="gaussian-quantiles",
                              title="Gaussian quantiles", short=caption)
-    return Documenter.HTML(repr(MIME"text/html"(), vega_head(; source=:inline)) *
-                           repr(MIME"text/html"(), node))
+    runtime = join(repr(MIME"text/html"(), script)
+                   for script in vega_head(; source=:inline))
+    return Documenter.HTML(runtime * repr(MIME"text/html"(), node))
 end
