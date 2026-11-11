@@ -1,4 +1,4 @@
-using AlgebraOfVega, Documenter
+using AlgebraOfVega
 import HTMXObjects
 
 function show_figure(spec, n_draws)
@@ -9,5 +9,5 @@ function show_figure(spec, n_draws)
                              title="Gaussian quantiles", short=caption)
     runtime = join(repr(MIME"text/html"(), script)
                    for script in vega_head(; source=:inline))
-    return Documenter.HTML(runtime * repr(MIME"text/html"(), node))
+    return Base.HTML(runtime * repr(MIME"text/html"(), node))
 end
