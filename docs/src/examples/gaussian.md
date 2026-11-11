@@ -75,21 +75,23 @@ work storage and the diagnostics from each transition.
 
 ```@example gaussian
 discard = 200
-for _ in 1:discard
-    state = nuts!!(state)
-end
-
 n_draws = 2_000
-draws = Matrix{Float64}(undef, length(target.center), n_draws)
-acceptance = Vector{Float64}(undef, n_draws)
-leapfrogs = Vector{Int}(undef, n_draws)
-divergences = falses(n_draws)
-for i in 1:n_draws
-    state = nuts!!(state)
-    draws[:, i] .= state.position
-    acceptance[i] = state.accept_prob
-    leapfrogs[i] = state.n_leapfrog
-    divergences[i] = state.divergent
+state, draws, acceptance, leapfrogs, divergences = let state=state
+    for _ in 1:discard
+        state = nuts!!(state)
+    end
+    draws = Matrix{Float64}(undef, length(target.center), n_draws)
+    acceptance = Vector{Float64}(undef, n_draws)
+    leapfrogs = Vector{Int}(undef, n_draws)
+    divergences = falses(n_draws)
+    for i in 1:n_draws
+        state = nuts!!(state)
+        draws[:, i] .= state.position
+        acceptance[i] = state.accept_prob
+        leapfrogs[i] = state.n_leapfrog
+        divergences[i] = state.divergent
+    end
+    (state, draws, acceptance, leapfrogs, divergences)
 end
 @assert all(isfinite, draws)
 (; coordinates=size(draws, 1), retained=size(draws, 2), discarded=discard)
