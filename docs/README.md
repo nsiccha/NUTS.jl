@@ -29,3 +29,6 @@ VitePress uses its upstream theme. The palette and figure rendering are local
 configuration pending the shared DocsKit package; no other site's theme or
 widget implementation is copied here. AlgebraOfVega generates Vega-Lite figures
 from build-executed calculations; its runtime follows the page's light/dark theme.
+`vitepress_html.jl` preserves backslashes in executed HTML on
+DocumenterVitepress 0.3.9 and detects when the installed writer no longer needs
+that adjustment. This integration belongs in the shared documentation package.

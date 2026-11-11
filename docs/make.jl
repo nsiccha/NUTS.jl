@@ -1,4 +1,5 @@
 using Documenter, DocumenterVitepress, NUTS
+include("vitepress_html.jl")
 
 const DOCS_PAGES = [
     "Start" => ["NUTS.jl" => "index.md"],
