@@ -8,8 +8,8 @@ export nuts!!
 Take one No-U-Turn Sampler transition with multinomial sampling and the strict
 generalized no-u-turn criterion. Return the updated state.
 
-The input is a named tuple, or an object with the same property interface,
-containing `rng`, `posterior`, `stepsize` and a mutable `position` vector.
+The input is a named tuple containing `rng`, `posterior`, `stepsize` and a
+mutable `position` vector.
 The target implements [`NUTS.log_density_gradient!`](@ref).
 
 Supply `scale` and `squared_scale` together, with
