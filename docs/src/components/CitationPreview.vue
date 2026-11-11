@@ -68,7 +68,7 @@ function updatePosition(targetEl) {
   if (!targetEl) return
   const rect = targetEl.getBoundingClientRect()
   const popoverWidth = Math.min(440, window.innerWidth - 24)
-  
+
   let left = rect.left + rect.width / 2 - popoverWidth / 2
   if (left < 12) left = 12
   if (left + popoverWidth > window.innerWidth - 12) {
@@ -128,7 +128,7 @@ function handleMouseOver(e) {
   if (!link) return
   const href = link.getAttribute('href')
   if (!href) return
-  
+
   const hashIndex = href.indexOf('#')
   if (hashIndex === -1) return
   const targetId = decodeURIComponent(href.slice(hashIndex + 1))
@@ -137,7 +137,7 @@ function handleMouseOver(e) {
   clearHideTimer()
   if (showTimer) clearTimeout(showTimer)
   const request = ++hoverRequest
-  
+
   showTimer = setTimeout(async () => {
     try {
       const html = await referenceHtml(link, targetId)

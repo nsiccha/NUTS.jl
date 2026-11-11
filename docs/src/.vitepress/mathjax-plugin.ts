@@ -76,7 +76,7 @@ export function mathjaxPlugin(options: MathJaxOptions = {}) {
       (_: string, attr: string, inner: string) =>
         `<mjx-break${attr}>${inner.replace(/ /g, '&nbsp;')}</mjx-break>`,
     )
-    
+
     // Wrap only display equations (not inline math)
     html = html.replace(
       /(<mjx-container[^>]*display="true"[^>]*>)([\s\S]*?)(<\/mjx-container>)/,
