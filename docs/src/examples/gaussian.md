@@ -198,11 +198,11 @@ build. Neither posterior draws nor rendered figures are committed to Git.
 <details><summary>Commands and build receipt</summary>
 ```
 
-Run these shell commands from the repository root; they prepare the docs
-environment rather than running inside a documentation code block.
+Run these shell commands from the repository root with Julia 1.10.13; they
+instantiate the committed docs environment without re-resolving its pins.
 
 ```sh
-julia --project=docs -e 'using Pkg; Pkg.develop(path=pwd()); Pkg.instantiate()'
+julia --project=docs -e 'using Pkg; Pkg.instantiate()'
 julia --project=docs docs/make.jl
 ```
 
