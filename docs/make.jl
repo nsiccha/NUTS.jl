@@ -14,14 +14,22 @@ makedocs(;
     modules=[NUTS],
     sitename="NUTS.jl",
     format=DocumenterVitepress.MarkdownVitepress(
-        repo="https://github.com/nsiccha/NUTS.jl",
+        repo="github.com/nsiccha/NUTS.jl",
         devbranch="main", devurl="dev",
+        build_vitepress=false,
     ),
     pages=DOCS_PAGES,
     checkdocs=:exports,
     warnonly=false,
     doctest=true,
 )
+
+using AlgebraOfVega
+let destination = joinpath(@__DIR__, "build", ".documenter", "public", "assets", "vega")
+    mkpath(dirname(destination))
+    cp(vega_vendor_dir(), destination; force=true)
+end
+DocumenterVitepress.build_docs(joinpath(@__DIR__, "build"))
 
 DocumenterVitepress.deploydocs(;
     repo="github.com/nsiccha/NUTS.jl", devbranch="main", push_preview=true,
