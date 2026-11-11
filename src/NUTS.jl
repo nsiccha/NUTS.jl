@@ -3,39 +3,44 @@ module NUTS
 export nuts!!
 
 """
-Implements the No-U-Turn Sampler with multinomial sampling and the strict generalized no-u-turn criterion.
+    nuts!!(state)
 
-Takes a single `state` argument and returns `new_state`, which contains the new sample's position at `new_state.position` / `new_state.current.position` and the new sample's gradient at `new_state.current.gradient`.
+Take one No-U-Turn Sampler transition with multinomial sampling and the strict
+generalized no-u-turn criterion. Return the updated state.
 
-The single `state` argument should behave like a NamedTuple with required properties
+The input is a named tuple containing `rng`, `posterior`, `stepsize` and a
+mutable `position` vector.
+The target implements [`NUTS.log_density_gradient!`](@ref).
 
-    * rng,
-    * posterior (implementing `NUTS.log_density_gradient!`),
-    * stepsize,
-    * position,
+Supply `scale` and `squared_scale` together, with
+`squared_scale = scale * scale'`. The sampler uses `ldiv!` with `scale'` to
+transform momentum and `mul!` with `squared_scale` to compute velocity.
+The identity pair `scale=I, squared_scale=I` is a complete configuration.
 
-and optional properties
+Optional controls are `max_depth=10` and `min_dhamiltonian=-1000.0`, the
+threshold for the change in negative Hamiltonian that marks a divergence.
+The returned state initializes and reuses internal work arrays. Keep the target,
+position dimension and storage depth fixed while reusing that state.
 
-    * max_depth = 10,
-    * min_dhamiltonian = -1000. (divergence threshold),
-    * current (current/initial phase point, i.e. the position, log_density, log_density_gradient, momentum, velocity, and hamiltonian),
-    * scale (a linear transformation to facilitate sampling, e.g. the scale of the posterior; if not specified initialized as a) NUTS.msqrt(squared_scale) if squared_scale is specified or b) I if squared_scale is not specified),
-    * squared_scale (the square of scale, initialized as NUTS.square(scale) if not specified),
-    * first (internal, leftmost phase point),
-    * trees (internal, memory needed for recursion),
-    * proposals (internal, memory needed for recursion).
-
-After first use, optional properties will be set in the returned `new_state` and reused in subsequent calls. 
-
-The `scale` property has to implement `ldiv!(state.scale', state.current.momentum)`
-and should implement `NUTS.square(scale)` if the `squared_scale` property is not specified.
-
-The `squared_scale` property has to implement `mul!(state.current.velocity, state.squared_scale, state.current.momentum)`
-and should implement `NUTS.msqrt(squared_scale)` if the `scale` property is not specified.
+The new draw is `state.position`; copy it when retaining draws. The returned
+`current` phase point contains `log_density` and `log_density_gradient`.
+Transition diagnostics are `divergent`, `accept_prob` (the mean integration
+acceptance probability) and `n_leapfrog` (the number of integration steps).
+This function does not adapt the step size or metric.
 """
 function nuts!! end
-"Posteriors need to implement `log_density = NUTS.log_density_gradient!(posterior, position, log_density_gradient)`,
-i.e. return the log density and write its gradient into `log_density_gradient`"
+
+"""
+    NUTS.log_density_gradient!(posterior, position, gradient)
+
+Return the scalar log density at `position` and overwrite every entry of
+`gradient` with its derivative in the same coordinates. Define a method for
+your target type. A position-independent normalization constant may be omitted.
+
+The current sampler allocates internal position and gradient buffers as
+`Vector{Float64}`. A target in transformed coordinates must include the
+appropriate log-Jacobian term and its derivative.
+"""
 function log_density_gradient! end
 "A square root of x, e.g. `chol(x).L`."
 msqrt(x) = begin

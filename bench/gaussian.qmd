@@ -1,14 +1,14 @@
-{{< include ../README.md >}}
+# Gaussian timing comparison
 
 ## Benchmark
   
 ### Standard normal
 
-Benchmarking and validating implementation using 100 chains sampling from a 100-dimensional standard normal distribution with unit stepsize. See code for benchmark details, either at [https://github.com/nsiccha/NUTS.jl/blob/main/docs/index.qmd](https://github.com/nsiccha/NUTS.jl/blob/main/docs/index.qmd) or on this page vie the menu in the top right corner of the text body.
+Historical timing and moment comparison using 100 chains sampling from a 100-dimensional standard normal distribution with unit stepsize. See code for benchmark details, either at [https://github.com/nsiccha/NUTS.jl/blob/main/bench/gaussian.qmd](https://github.com/nsiccha/NUTS.jl/blob/main/bench/gaussian.qmd) or on this page via the menu in the top right corner of the text body.
 
 ```{julia}
 using DynamicHMC, NUTS, Random, Distributions, LinearAlgebra, LogExpFunctions, Chairmarks, LogDensityProblems, AdvancedHMC, Plots, DataFrames, StatsBase
-ENV["CMDSTAN"] = "/home/niko/.cmdstan/cmdstan-2.34.0"  
+haskey(ENV, "CMDSTAN") || error("Set CMDSTAN to the installation used for this benchmark")
 using Stan
     
 sm = (@isdefined sm) ? sm : Stan.SampleModel("Normal", """
@@ -183,7 +183,7 @@ plot(
   
 ### Non-standard normal
 
-Benchmarking and validating implementation using 100 chains sampling from a 100-dimensional non-standard normal distribution with unit stepsize. See code for benchmark details, either at [https://github.com/nsiccha/NUTS.jl/blob/main/docs/index.qmd](https://github.com/nsiccha/NUTS.jl/blob/main/docs/index.qmd) or on this page vie the menu in the top right corner of the text body.
+Historical timing and moment comparison using 100 chains sampling from a 100-dimensional non-standard normal distribution with unit stepsize. See code for benchmark details, either at [https://github.com/nsiccha/NUTS.jl/blob/main/bench/gaussian.qmd](https://github.com/nsiccha/NUTS.jl/blob/main/bench/gaussian.qmd) or on this page via the menu in the top right corner of the text body.
 ```{julia}
 posterior = PreparedNormal(randn(d), MatrixFactorization(Reflection(normalize!(randn(d))), Diagonal(exp.(randn(d)))))
 fs = (iid_sample!, nuts_sample!, dynamichmc_sample!)#, advancedhmc_sample!)

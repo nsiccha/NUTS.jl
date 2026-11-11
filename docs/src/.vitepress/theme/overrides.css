@@ -1,0 +1,14 @@
+:root {
+  --vp-c-brand-1: #2a78d6;
+  --vp-c-brand-2: #2469bd;
+  --vp-c-brand-3: #1e5ba6;
+  --vp-c-text-1: #0b0b0b;
+  --aov-category: #2a78d6, #eb6834;
+  --aov-font: var(--vp-font-family-base);
+}
+.dark {
+  --vp-c-brand-1: #6ca7ed;
+  --vp-c-brand-2: #4b91e5;
+  --vp-c-brand-3: #2a78d6;
+  --vp-c-text-1: #e2e2e3;
+}

@@ -1,0 +1,37 @@
+using Documenter, DocumenterVitepress, NUTS
+include("vitepress_html.jl")
+
+const DOCS_PAGES = [
+    "Start" => ["NUTS.jl" => "index.md"],
+    "Guides" => ["Log density" => "guides/targets.md",
+                 "Sampler state" => "guides/state.md"],
+    "Examples" => ["Gaussian coordinates" => "examples/gaussian.md"],
+    "Reference" => ["API" => "reference/api.md"],
+]
+include("lint.jl")
+lint_docs(joinpath(@__DIR__, "src"), DOCS_PAGES)
+
+makedocs(;
+    modules=[NUTS],
+    sitename="NUTS.jl",
+    format=DocumenterVitepress.MarkdownVitepress(
+        repo="github.com/nsiccha/NUTS.jl",
+        devbranch="main", devurl="dev",
+        build_vitepress=false,
+    ),
+    pages=DOCS_PAGES,
+    checkdocs=:exports,
+    warnonly=false,
+    doctest=true,
+)
+
+using AlgebraOfVega
+let destination = joinpath(@__DIR__, "build", ".documenter", "public", "assets", "vega")
+    mkpath(dirname(destination))
+    cp(vega_vendor_dir(), destination; force=true)
+end
+DocumenterVitepress.build_docs(joinpath(@__DIR__, "build"))
+
+DocumenterVitepress.deploydocs(;
+    repo="github.com/nsiccha/NUTS.jl", devbranch="main", push_preview=true,
+)
