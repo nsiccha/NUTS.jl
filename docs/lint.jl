@@ -27,3 +27,8 @@ function lint_docs(root, pages)
         println("DOCS-LINT $page prose_words=$words")
     end
 end
+
+if abspath(PROGRAM_FILE) == @__FILE__
+    include("pages.jl")
+    lint_docs(joinpath(@__DIR__, "src"), DOCS_PAGES)
+end

@@ -1,0 +1,4 @@
+[[landing_check]]
+name = "docs lint"
+run = ["julia", "--startup-file=no", "docs/lint.jl"]
+timeout_s = 120
