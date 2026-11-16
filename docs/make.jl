@@ -12,13 +12,7 @@ function Documenter.Selectors.runner(::Type{CopyVegaAssets}, doc::Documenter.Doc
     cp(vega_vendor_dir(), destination; force=true)
 end
 
-const DOCS_PAGES = [
-    "Start" => ["NUTS.jl" => "index.md"],
-    "Guides" => ["Log density" => "guides/targets.md",
-                 "Sampler state" => "guides/state.md"],
-    "Examples" => ["Gaussian coordinates" => "examples/gaussian.md"],
-    "Reference" => ["API" => "reference/api.md"],
-]
+include("pages.jl")
 include("lint.jl")
 lint_docs(joinpath(@__DIR__, "src"), DOCS_PAGES)
 
